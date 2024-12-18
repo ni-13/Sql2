@@ -93,4 +93,19 @@ FROM tree;
 
 # DepartmentTop3Salaries_Solution_Q4
 
-# will be solved in coming class 
+# without the use of window fn
+
+SELECT d.name AS 'Department', e.name AS 'Employee', e.salary 
+FROM Employee e
+LEFT JOIN Department d ON e.departmentId = d.id 
+WHERE 3 > (SELECT COUNT(DISTINCT e2.salary) FROM Employee e2 WHERE e2.salary > e.salary AND e.departmentId = e2.departmentId);
+
+# Alternative1
+
+# using Dense rank and Left join
+
+WITH cte AS(
+    SELECT e.name, e.departmentId, e.salary, DENSE_RANK() OVER(PARTITION BY e.departmentId ORDER BY e.salary DESC) AS 'rank' FROM Employee e
+)
+SELECT d.name AS 'Department', c.name AS 'Employee', c.salary FROM cte c
+LEFT JOIN Department d ON c.departmentId = d.id WHERE c.rank < 4; 
